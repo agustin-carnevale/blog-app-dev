@@ -4,11 +4,12 @@ const redisUrl='redis://127.0.0.1:6379';
 const client=redis.createClient(redisUrl);
 const util=require('util');
 
-client.get= util.promisify(client.get);
+client.hget= util.promisify(client.hget);
 const exec = mongoose.Query.prototype.exec;
 
-mongoose.Query.prototype.cache = function (){
+mongoose.Query.prototype.cache = function (options={}){
 	this.useCache=true;
+	this.hashKey=JSON.stringify(options.key || '');
 	return this;
 }
 
@@ -27,7 +28,7 @@ mongoose.Query.prototype.exec = async function (){
 
 
  	// Do we have any cached data in redis related to this query?
-    const cachedValue = await client.get(key);
+    const cachedValue = await client.hget(this.hashKey, key);
 
 
     //If yes, then respond to the request right away
@@ -50,11 +51,16 @@ mongoose.Query.prototype.exec = async function (){
    	const result = await exec.apply(this,arguments);
     
     //Save in Cache (Redis)
-    client.set(key,JSON.stringify(result));
+    client.hset(this.hashKey,key,JSON.stringify(result),'EX',3000);
 
     return result;
 
 }
 
+module.exports={
+	clearHash(hashKey){
+		client.del(JSON.stringify(hashKey));
+	}
+}
 
    
