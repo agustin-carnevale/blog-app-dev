@@ -51,7 +51,7 @@ mongoose.Query.prototype.exec = async function (){
    	const result = await exec.apply(this,arguments);
     
     //Save in Cache (Redis)
-    client.hset(this.hashKey,key,JSON.stringify(result),'EX',3000);
+    client.hset(this.hashKey,key,JSON.stringify(result),'EX',5);
 
     return result;
 
