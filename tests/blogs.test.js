@@ -18,14 +18,12 @@ describe('When logged in', async () =>{
 	beforeEach(async ()=>{
 		await page.login();
 		await page.click('a.btn-floating'); //(+) Button
-
 	});
 
 	test('Can see blog creation form.', async ()=>{
 		//We see form labels
 		const label = await page.getContentOf('form label');
 		expect(label).toEqual('Blog Title');
-
 	});
 
 	describe('And using valid inputs', async()=>{
@@ -74,37 +72,12 @@ describe('When logged in', async () =>{
 describe('When not logged in', async () =>{
 
 	test('User cannot create a blog post',async()=>{
-
-		//This makes a request from the chromium browser instance
-		//to make it as real as possible
-		const result = await page.evaluate(() => {
-			return fetch('/api/blogs', {
-				method:'POST',
-				credentials:'same-origin',
-				headers: {
-					'Content-Type':'application/json'
-				}, 
-				body: JSON.stringify({title:'My Title', content:'My Content'})
-			}).then(res => res.json());
-		});
-
+		const result = await page.post('/api/blogs',{title:'My Title', content:'My Content'});
 		expect(result).toEqual({error: 'You must log in!'});
 	});
 
 	test('User cannot get a blog posts',async()=>{
-
-		//This makes a request from the chromium browser instance
-		//to make it as real as possible
-		const result = await page.evaluate(() => {
-			return fetch('/api/blogs', {
-				method:'GET',
-				credentials:'same-origin',
-				headers: {
-					'Content-Type':'application/json'
-				}
-			}).then(res => res.json());
-		});
-
+		const result = await page.get('/api/blogs');
 		expect(result).toEqual({error: 'You must log in!'});
 	});
 
