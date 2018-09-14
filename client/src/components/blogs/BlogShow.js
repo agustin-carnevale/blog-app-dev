@@ -7,6 +7,12 @@ class BlogShow extends Component {
     this.props.fetchBlog(this.props.match.params._id);
   }
 
+  renderImage(){
+    if(this.props.blog.imageUrl)
+      return <img src={'https://s3-sa-east-1.amazonaws.com/my-blog-app-bucket/'+this.props.blog.imageUrl}
+      alt="blog"/>
+  }
+
   render() {
     if (!this.props.blog) {
       return '';
@@ -17,6 +23,7 @@ class BlogShow extends Component {
     return (
       <div>
         <h3>{title}</h3>
+        {this.renderImage()}
         <p>{content}</p>
       </div>
     );
